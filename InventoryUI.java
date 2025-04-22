@@ -221,6 +221,7 @@ public class InventoryUI extends JFrame {
     
             if(!rs.next()){
                 JOptionPane.showMessageDialog(this, "End of results!");
+                currentPage--;
                 return;
             }
 
