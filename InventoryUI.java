@@ -20,10 +20,28 @@ public class InventoryUI extends JFrame {
     private JButton insertButton, updateButton, deleteButton, searchButton, viewAllButton;
 
     public InventoryUI() {
+
         try {
 
             Class.forName("com.mysql.cj.jdbc.Driver");
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invent", "root", "root");
+
+            // Connect first
+            conn = DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/",
+                    "root",
+                    "root"
+            );
+
+            // Then setup database/table
+            setupDatabase();
+
+            // Reconnect with database selected
+            conn = DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/invent",
+                    "root",
+                    "root"
+            );
+
             status = true;
 
             setTitle("QuickStock");
@@ -38,7 +56,13 @@ public class InventoryUI extends JFrame {
             setVisible(true);
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Failed to connect database: " + e.getMessage());
+
+            e.printStackTrace();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Failed:\n" + e.getMessage()
+            );
         }
     }
 
@@ -189,6 +213,44 @@ public class InventoryUI extends JFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Error calculating total pages: " + e.getMessage());
+        }
+    }
+
+    private void setupDatabase() {
+
+        try {
+
+            Statement stmt = conn.createStatement();
+
+            // Create Database
+            stmt.executeUpdate(
+                    "CREATE DATABASE IF NOT EXISTS invent"
+            );
+
+            // Select Database
+            stmt.execute("USE invent");
+
+            // Create Table
+            stmt.executeUpdate(
+                    "CREATE TABLE IF NOT EXISTS inventory ("
+                    + "id INT PRIMARY KEY AUTO_INCREMENT,"
+                    + "name VARCHAR(100) NOT NULL,"
+                    + "quantity INT NOT NULL,"
+                    + "price DOUBLE NOT NULL"
+                    + ")"
+            );
+
+            System.out.println(
+                    "Database and table checked/created successfully!"
+            );
+
+        } catch (SQLException e) {
+
+            System.out.println(
+                    "DATABASE SETUP ERROR"
+            );
+
+            e.printStackTrace();
         }
     }
 
