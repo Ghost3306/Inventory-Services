@@ -1,3 +1,4 @@
+
 import java.awt.*;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -6,6 +7,7 @@ import java.util.Vector;
 import javax.swing.*;
 
 public class InventoryUI extends JFrame {
+
     private Connection conn;
     private boolean status;
     private int currentPage = 1;
@@ -19,24 +21,20 @@ public class InventoryUI extends JFrame {
 
     public InventoryUI() {
         try {
-         
+
             Class.forName("com.mysql.cj.jdbc.Driver");
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3340/invent", "root", "root");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invent", "root", "root");
             status = true;
 
-           
             setTitle("QuickStock");
             setSize(700, 500);
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             setLocationRelativeTo(null);
 
-            
             initUI();
 
-       
             fetchData();
 
-     
             setVisible(true);
 
         } catch (Exception e) {
@@ -44,35 +42,29 @@ public class InventoryUI extends JFrame {
         }
     }
 
-  
     private void initUI() {
-     
+
         setLayout(new BorderLayout());
-        ImageIcon icon = new ImageIcon("logo.png"); 
+        ImageIcon icon = new ImageIcon("logo.png");
         setIconImage(icon.getImage());
-    
+
         JPanel headingPanel = new JPanel();
         headingPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         JLabel headingLabel = new JLabel("QuickStock Inventory");
         headingLabel.setFont(new Font("Arial", Font.BOLD, 20));
         headingPanel.add(headingLabel);
 
-        
         JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());  
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
+        panel.setLayout(new GridBagLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5); 
+        gbc.insets = new Insets(5, 5, 5, 5);
 
-       
-        
-        
         nameField = new JTextField(10);
         quantityField = new JTextField(10);
         priceField = new JTextField(10);
         searchField = new JTextField(15);
 
-     
         insertButton = new JButton("Insert");
         updateButton = new JButton("Update");
         deleteButton = new JButton("Delete");
@@ -82,69 +74,69 @@ public class InventoryUI extends JFrame {
         JButton nextPageButton = new JButton("Next");
         JButton prevPageButton = new JButton("Previous");
 
-
-
-
         insertButton.addActionListener(e -> insertData());
         updateButton.addActionListener(e -> updateData());
         deleteButton.addActionListener(e -> deleteData());
         searchButton.addActionListener(e -> searchData());
-        viewAllButton.addActionListener(e -> fetchData()); 
+        viewAllButton.addActionListener(e -> fetchData());
         exportButton.addActionListener(e -> exportToCSV());
-        
-        
 
-    
-        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
         panel.add(new JLabel("Name:"), gbc);
 
-        gbc.gridx = 1; gbc.gridy = 0;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
         panel.add(nameField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
         panel.add(new JLabel("Quantity:"), gbc);
 
-        gbc.gridx = 1; gbc.gridy = 1;
+        gbc.gridx = 1;
+        gbc.gridy = 1;
         panel.add(quantityField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
         panel.add(new JLabel("Price:"), gbc);
 
-        gbc.gridx = 1; gbc.gridy = 2;
+        gbc.gridx = 1;
+        gbc.gridy = 2;
         panel.add(priceField, gbc);
 
-      
-        gbc.gridx = 0; gbc.gridy = 3;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
         panel.add(insertButton, gbc);
 
-        gbc.gridx = 1; gbc.gridy = 3;
+        gbc.gridx = 1;
+        gbc.gridy = 3;
         panel.add(updateButton, gbc);
 
-        gbc.gridx = 2; gbc.gridy = 3;
+        gbc.gridx = 2;
+        gbc.gridy = 3;
         panel.add(deleteButton, gbc);
 
-       
         JPanel searchPanel = new JPanel();
         searchPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 15, 10));
         searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         searchPanel.add(new JLabel("Search by Name:"));
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
-        searchPanel.add(viewAllButton); 
+        searchPanel.add(viewAllButton);
 
         searchPanel.add(exportButton);
-        
+
         JButton sortByPrice = new JButton("Sort by price");
         JButton sortByQuantity = new JButton("Sort by quantity");
         sortByPrice.addActionListener(e -> {
-            orderby="ORDER BY price ASC";
-            fetchData();
-        });        
-        sortByQuantity.addActionListener(e->{
-            orderby="ORDER BY quantity ASC";
+            orderby = "ORDER BY price ASC";
             fetchData();
         });
-
+        sortByQuantity.addActionListener(e -> {
+            orderby = "ORDER BY quantity ASC";
+            fetchData();
+        });
 
         JPanel paginationPanel = new JPanel();
         JButton prevButton = new JButton("Prev");
@@ -155,7 +147,7 @@ public class InventoryUI extends JFrame {
         paginationPanel.add(sortByPrice);
         paginationPanel.add(sortByQuantity);
         paginationPanel.add(totalPagesLabel);
-        
+
         updateTotalPages();
 
         nextButton.addActionListener(e -> {
@@ -163,7 +155,7 @@ public class InventoryUI extends JFrame {
             fetchData();
             updateTotalPages();
         });
-        
+
         prevButton.addActionListener(e -> {
             if (currentPage > 1) {
                 currentPage--;
@@ -175,17 +167,15 @@ public class InventoryUI extends JFrame {
         inventoryTable = new JTable();
         scrollPane = new JScrollPane(inventoryTable);
 
-      
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
-        mainPanel.add(headingPanel, BorderLayout.NORTH);  
-        mainPanel.add(panel, BorderLayout.CENTER);  
-        mainPanel.add(searchPanel, BorderLayout.SOUTH);  
-        add(mainPanel, BorderLayout.NORTH); 
-        add(scrollPane, BorderLayout.CENTER); 
+        mainPanel.add(headingPanel, BorderLayout.NORTH);
+        mainPanel.add(panel, BorderLayout.CENTER);
+        mainPanel.add(searchPanel, BorderLayout.SOUTH);
+        add(mainPanel, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
         add(paginationPanel, BorderLayout.SOUTH);
     }
-
 
     private void updateTotalPages() {
         try {
@@ -203,46 +193,85 @@ public class InventoryUI extends JFrame {
     }
 
     private void fetchData() {
+
         try {
+
+            if (currentPage < 1) {
+                currentPage = 1;
+            }
+
             int offset = (currentPage - 1) * rowsPerPage;
-            String query = "SELECT * FROM inventory "+orderby+" LIMIT ? OFFSET ?";
-            PreparedStatement pstmt = conn.prepareStatement(query);
+
+            String query
+                    = "SELECT * FROM inventory "
+                    + orderby
+                    + " LIMIT ? OFFSET ?";
+
+            PreparedStatement pstmt
+                    = conn.prepareStatement(query);
+
             pstmt.setInt(1, rowsPerPage);
             pstmt.setInt(2, offset);
+
             ResultSet rs = pstmt.executeQuery();
-    
+
             Vector<Vector<Object>> data = new Vector<>();
             Vector<String> columnNames = new Vector<>();
+
             columnNames.add("ID");
             columnNames.add("Name");
             columnNames.add("Quantity");
             columnNames.add("Price");
             columnNames.add("Total");
-    
-            if(!rs.next()){
-                JOptionPane.showMessageDialog(this, "End of results!");
-                currentPage--;
-                return;
-            }
 
             while (rs.next()) {
+
                 Vector<Object> row = new Vector<>();
+
                 row.add(rs.getInt("id"));
                 row.add(rs.getString("name"));
                 row.add(rs.getInt("quantity"));
                 row.add(rs.getDouble("price"));
-                row.add(rs.getInt("quantity") * rs.getDouble("price"));
+                row.add(
+                        rs.getInt("quantity")
+                        * rs.getDouble("price")
+                );
+
                 data.add(row);
             }
-    
-            inventoryTable.setModel(new javax.swing.table.DefaultTableModel(data, columnNames));
+
+            if (data.isEmpty()) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No more records!"
+                );
+
+                if (currentPage > 1) {
+                    currentPage--;
+                }
+
+                return;
+            }
+
+            inventoryTable.setModel(
+                    new javax.swing.table.DefaultTableModel(
+                            data,
+                            columnNames
+                    )
+            );
+
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error fetching data: " + e.getMessage());
+
+            e.printStackTrace();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Error fetching data:\n" + e.getMessage()
+            );
         }
     }
-    
 
-  
     private void insertData() {
         try {
             String name = nameField.getText();
@@ -256,7 +285,7 @@ public class InventoryUI extends JFrame {
             pstmt.setDouble(3, price);
             pstmt.executeUpdate();
             JOptionPane.showMessageDialog(this, "Data inserted successfully!");
-            fetchData(); 
+            fetchData();
             quantityField.setText("");
             priceField.setText("");
             nameField.setText("");
@@ -316,7 +345,7 @@ public class InventoryUI extends JFrame {
             } else {
                 JOptionPane.showMessageDialog(this, "No record found with ID " + id);
             }
-            fetchData(); 
+            fetchData();
             quantityField.setText("");
             priceField.setText("");
             nameField.setText("");
@@ -325,7 +354,6 @@ public class InventoryUI extends JFrame {
         }
     }
 
-   
     private void deleteData() {
         try {
             int id = Integer.parseInt(JOptionPane.showInputDialog("Enter ID to delete:"));
@@ -338,13 +366,12 @@ public class InventoryUI extends JFrame {
             } else {
                 JOptionPane.showMessageDialog(this, "No record found with ID " + id);
             }
-            fetchData(); 
+            fetchData();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Error deleting data: " + e.getMessage());
         }
     }
 
-   
     private void searchData() {
         try {
             String name = searchField.getText();
@@ -377,7 +404,6 @@ public class InventoryUI extends JFrame {
         }
     }
 
-   
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new InventoryUI());
     }
