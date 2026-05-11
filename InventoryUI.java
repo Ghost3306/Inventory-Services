@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.Vector;
 import javax.swing.*;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartFrame;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 public class InventoryUI extends JFrame {
 
@@ -18,6 +23,47 @@ public class InventoryUI extends JFrame {
     private JScrollPane scrollPane;
     private JTextField nameField, quantityField, priceField, searchField;
     private JButton insertButton, updateButton, deleteButton, searchButton, viewAllButton;
+
+    private boolean showLoginDialog() {
+
+        JTextField usernameField = new JTextField();
+        JPasswordField passwordField = new JPasswordField();
+
+        Object[] message = {
+            "Username:", usernameField,
+            "Password:", passwordField
+        };
+
+        int option = JOptionPane.showConfirmDialog(
+                this,
+                message,
+                "Login",
+                JOptionPane.OK_CANCEL_OPTION
+        );
+
+        if (option == JOptionPane.OK_OPTION) {
+
+            String username = usernameField.getText();
+            String password = String.valueOf(passwordField.getPassword());
+
+            if (username.equals("admin")
+                    && password.equals("admin")) {
+
+                return true;
+
+            } else {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Invalid Username or Password"
+                );
+
+                return false;
+            }
+        }
+
+        return false;
+    }
 
     public InventoryUI() {
 
@@ -45,7 +91,7 @@ public class InventoryUI extends JFrame {
             status = true;
 
             setTitle("QuickStock");
-            setSize(700, 500);
+            setSize(1000, 700);
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             setLocationRelativeTo(null);
 
@@ -53,8 +99,14 @@ public class InventoryUI extends JFrame {
 
             fetchData();
 
-            setVisible(true);
+            if (showLoginDialog()) {
 
+                setVisible(true);
+
+            } else {
+
+                dispose();
+            }
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -94,6 +146,8 @@ public class InventoryUI extends JFrame {
         deleteButton = new JButton("Delete");
         searchButton = new JButton("Search");
         viewAllButton = new JButton("View All");
+        JButton pieChartButton = new JButton("Pie Chart");
+        JButton barChartButton = new JButton("Bar Chart");
         JButton exportButton = new JButton("Export to CSV");
         JButton nextPageButton = new JButton("Next");
         JButton prevPageButton = new JButton("Previous");
@@ -104,7 +158,8 @@ public class InventoryUI extends JFrame {
         searchButton.addActionListener(e -> searchData());
         viewAllButton.addActionListener(e -> fetchData());
         exportButton.addActionListener(e -> exportToCSV());
-
+        pieChartButton.addActionListener(e -> showPieChart());
+        barChartButton.addActionListener(e -> showBarChart());
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(new JLabel("Name:"), gbc);
@@ -150,7 +205,8 @@ public class InventoryUI extends JFrame {
         searchPanel.add(viewAllButton);
 
         searchPanel.add(exportButton);
-
+        searchPanel.add(pieChartButton);
+        searchPanel.add(barChartButton);
         JButton sortByPrice = new JButton("Sort by price");
         JButton sortByQuantity = new JButton("Sort by quantity");
         sortByPrice.addActionListener(e -> {
@@ -463,6 +519,108 @@ public class InventoryUI extends JFrame {
             inventoryTable.setModel(new javax.swing.table.DefaultTableModel(data, columnNames));
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Error searching data: " + e.getMessage());
+        }
+    }
+
+    private void showPieChart() {
+
+        try {
+
+            DefaultPieDataset dataset
+                    = new DefaultPieDataset();
+
+            String query
+                    = "SELECT name, quantity FROM inventory";
+
+            Statement stmt
+                    = conn.createStatement();
+
+            ResultSet rs
+                    = stmt.executeQuery(query);
+
+            while (rs.next()) {
+
+                dataset.setValue(
+                        rs.getString("name"),
+                        rs.getInt("quantity")
+                );
+            }
+
+            JFreeChart chart
+                    = ChartFactory.createPieChart(
+                            "Inventory Quantity",
+                            dataset,
+                            true,
+                            true,
+                            false
+                    );
+
+            ChartFrame frame
+                    = new ChartFrame(
+                            "Pie Chart",
+                            chart
+                    );
+
+            frame.setSize(600, 600);
+            frame.setVisible(true);
+
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    e.getMessage()
+            );
+        }
+    }
+
+    private void showBarChart() {
+
+        try {
+
+            DefaultCategoryDataset dataset
+                    = new DefaultCategoryDataset();
+
+            String query
+                    = "SELECT name, quantity FROM inventory";
+
+            Statement stmt
+                    = conn.createStatement();
+
+            ResultSet rs
+                    = stmt.executeQuery(query);
+
+            while (rs.next()) {
+
+                dataset.addValue(
+                        rs.getInt("quantity"),
+                        "Stock",
+                        rs.getString("name")
+                );
+            }
+
+            JFreeChart chart
+                    = ChartFactory.createBarChart(
+                            "Inventory Stock",
+                            "Product",
+                            "Quantity",
+                            dataset
+                    );
+
+            ChartFrame frame
+                    = new ChartFrame(
+                            "Bar Chart",
+                            chart
+                    );
+
+            frame.setSize(800, 600);
+            frame.setVisible(true);
+
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    e.getMessage()
+            );
         }
     }
 
